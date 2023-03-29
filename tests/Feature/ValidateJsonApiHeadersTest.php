@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 use App\Http\Middleware\ValidateJsonApiHeaders;
 
-class ValidationJsonApiHeadersTest extends TestCase
+class ValidateJsonApiHeadersTest extends TestCase
 {
     use RefreshDatabase;
 
