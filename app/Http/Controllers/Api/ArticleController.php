@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ArticleCollection;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
-use Illuminate\Http\Request;
+use App\Http\Requests\SaveArticleRequest;
+use Illuminate\Http\Response;
 
 class ArticleController extends Controller
 {
@@ -20,20 +21,24 @@ class ArticleController extends Controller
         return ArticleCollection::make(Article::all());
     }
 
-    public function store(Request $request)
+    public function store(SaveArticleRequest $request)
     {
-        $request->validate([
-            'data.attributes.title' => 'required|min:3',
-            'data.attributes.slug' => 'required',
-            'data.attributes.content' => 'required',
-        ]);
-
-        $article = Article::create([
-            'title' => $request->input('data.attributes.title'),
-            'slug' => $request->input('data.attributes.slug'),
-            'content' => $request->input('data.attributes.content')
-        ]);
+        $article = Article::create($request->validated());
 
         return ArticleResource::make($article);
+    }
+
+    public function update(SaveArticleRequest $request, Article $article)
+    {
+        $article->update($request->validated());
+
+        return ArticleResource::make($article);
+    }
+
+    public function destroy(Article $article): Response
+    {
+        $article->delete();
+
+        return response()->noContent();
     }
 }

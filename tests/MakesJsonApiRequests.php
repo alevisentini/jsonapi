@@ -9,6 +9,8 @@ use PHPUnit\Framework\ExpectationFailedException;
 use Illuminate\Support\Str;
 trait MakesJsonApiRequests
 {
+    protected bool $formatJsonApiDocument = true;
+
     protected function assertJsonApiValidationErrors(): Closure
     {
         return function ($attribute) {
@@ -62,11 +64,35 @@ trait MakesJsonApiRequests
         TestResponse::macro('assertJsonApiValidationErrors', $this->assertJsonApiValidationErrors());
     }
 
+    protected function getFormattedData($uri, array $data): array
+    {
+        $path = parse_url($uri)['path'];
+        $type = (string) Str::of($path)->after('api/v1/')->before('/');
+        $id = (string) Str::of($uri)->after($type)->replace('/', '');
+
+        return [
+            'data' => array_filter([
+                'type' => $type,
+                'id' => $id,
+                'attributes' => $data,
+            ])
+        ];
+    }
+
+    public function withoutJsonApiDocumentFormatting()
+    {
+        $this->formatJsonApiDocument = false;
+    }
+
     public function json($method, $uri, array $data = [], array $headers = [], $options = 0): TestResponse
     {
         $headers['Accept'] = 'application/vnd.api+json';
+        
+        if ($this->formatJsonApiDocument) {
+            $formattedData = $this->getFormattedData($uri, $data);
+        }
 
-        return parent::json($method, $uri, $data, $headers);
+        return parent::json($method, $uri, $formattedData ?? $data, $headers);
     }
 
     public function postJson($uri, array $data = [], array $headers = [], $options = 0): TestResponse

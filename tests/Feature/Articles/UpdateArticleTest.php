@@ -3,28 +3,28 @@
 namespace Tests\Feature\Articles;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Article;
-use Illuminate\Testing\TestResponse;
 
-class CreateArticlesTest extends TestCase
+class UpdateArticleTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
      * @test
      */
-    public function can_create_articles()
+    public function can_update_articles()
     {
         $this->withoutExceptionHandling();
 
-        $response = $this->postJson(route('api.v1.articles.store'), [
-                    'title' => 'Some title',
-                    'slug' => 'some-title',
-                    'content' => 'Some content',
-        ])->assertCreated();
+        $article = Article::factory()->create();
 
-        $article = Article::first();
+        $response = $this->patchJson(route('api.v1.articles.update', $article), [
+                    'title' => 'Update title',
+                    'slug' => 'update-title',
+                    'content' => 'Update content',
+        ])->assertOk();
 
         $response->assertHeader('Location', route('api.v1.articles.show', $article));
 
@@ -33,9 +33,9 @@ class CreateArticlesTest extends TestCase
                 'type' => 'articles',
                 'id' => (string) $article->getRouteKey(),
                 'attributes' => [
-                    'title' => 'Some title',
-                    'slug' => 'some-title',
-                    'content' => 'Some content',
+                    'title' => 'Update title',
+                    'slug' => 'update-title',
+                    'content' => 'Update content',
                 ],
                 'links' => [
                     'self' => url(route('api.v1.articles.show', $article)),
@@ -51,9 +51,11 @@ class CreateArticlesTest extends TestCase
      */
     public function title_is_required()
     {
-        $this->postJson(route('api.v1.articles.store'), [
-                    'slug' => 'some-title',
-                    'content' => 'Some content',
+        $article = Article::factory()->create();
+
+        $this->patchJson(route('api.v1.articles.update', $article), [
+                    'slug' => 'update-title',
+                    'content' => 'Update content',
         ])->assertJsonApiValidationErrors('title');
     }
 
@@ -64,9 +66,11 @@ class CreateArticlesTest extends TestCase
      */
     public function slug_is_required()
     {
-        $this->postJson(route('api.v1.articles.store'), [
-                    'title' => 'Some title',
-                    'content' => 'Some content',
+        $article = Article::factory()->create();
+
+        $this->patchJson(route('api.v1.articles.update', $article), [
+                    'title' => 'Update title',
+                    'content' => 'Update content',
         ])->assertJsonApiValidationErrors('slug');
     }
 
@@ -77,9 +81,11 @@ class CreateArticlesTest extends TestCase
      */
     public function content_is_required()
     {
-        $this->postJson(route('api.v1.articles.store'), [
-                    'title' => 'Some title',
-                    'slug' => 'some-title',
+        $article = Article::factory()->create();
+
+        $this->patchJson(route('api.v1.articles.update', $article), [
+                    'title' => 'Update title',
+                    'slug' => 'update-title',
         ])->assertJsonApiValidationErrors('content');
     }
 
@@ -90,10 +96,13 @@ class CreateArticlesTest extends TestCase
      */
     public function title_must_be_at_least_3_characters()
     {
-        $this->postJson(route('api.v1.articles.store'), [
+        $article = Article::factory()->create();
+
+        $this->patchJson(route('api.v1.articles.update', $article), [
                     'title' => 'ab',
-                    'slug' => 'some-title',
-                    'content' => 'Some content',
+                    'slug' => 'update-title',
+                    'content' => 'Update content',
         ])->assertJsonApiValidationErrors('title');
     }
 }
+
