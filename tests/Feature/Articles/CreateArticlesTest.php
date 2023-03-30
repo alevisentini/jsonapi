@@ -73,6 +73,79 @@ class CreateArticlesTest extends TestCase
     /**
      * @test
      * 
+     * slug is unique
+     */
+    public function slug_must_be_unique()
+    {
+        $article = Article::factory()->create();
+
+        $this->postJson(route('api.v1.articles.store'), [
+                    'title' => 'Some title',
+                    'slug' => $article->slug,
+                    'content' => 'Some content',
+        ])->assertJsonApiValidationErrors('slug');
+    }
+
+    /**
+     * @test
+     * 
+     * slug must only contain letters, numbers and underscores
+     */
+    public function slug_must_only_contain_letters_numbers_and_underscores()
+    {
+        $this->postJson(route('api.v1.articles.store'), [
+                    'title' => 'Some title',
+                    'slug' => '?*%',
+                    'content' => 'Some content',
+        ])->assertJsonApiValidationErrors('slug');
+    }
+
+    /**
+     * @test
+     * 
+     * slug must not contain underscores
+     */
+    public function slug_must_not_contain_underscores()
+    {
+        $this->postJson(route('api.v1.articles.store'), [
+                    'title' => 'Some title',
+                    'slug' => 'some_title',
+                    'content' => 'Some content',
+        ])->assertJsonApiValidationErrors('slug');
+    }
+
+    /**
+     * @test
+     * 
+     * slug must not start with dashes
+     */
+    public function slug_must_not_start_with_dashes()
+    {
+        $this->postJson(route('api.v1.articles.store'), [
+                    'title' => 'Some title',
+                    'slug' => '-some-title',
+                    'content' => 'Some content',
+        ])->assertJsonApiValidationErrors('slug');
+    }
+
+    /**
+     * @test
+     * 
+     * slug must not end with dashes
+     */
+    public function slug_must_not_end_with_dashes()
+    {
+        $this->postJson(route('api.v1.articles.store'), [
+                    'title' => 'Some title',
+                    'slug' => 'some-title-',
+                    'content' => 'Some content',
+        ])->assertJsonApiValidationErrors('slug');
+    }
+
+    
+    /**
+     * @test
+     * 
      * content is required
      */
     public function content_is_required()
