@@ -40,14 +40,12 @@ class JsonApiServiceProvider extends ServiceProvider
         });
 
         Builder::macro('jsonPaginate', function () {
-            $this->paginate(
+            return $this->paginate(
                 $perPage = request('page.size', 15),
                 $columns = ['*'],
                 $pageName = 'page[number]',
                 $page = request('page.number', 1)
             )->appends(request()->only('sort','page.size'));
-
-            return $this;
         });
     }
 }

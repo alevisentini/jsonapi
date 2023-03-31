@@ -18,15 +18,9 @@ class ArticleController extends Controller
 
     public function index(): ArticleCollection
     {
-        $articles = Article::allowedSorts(['title', 'content']);
-        //->jsonPaginate();
+        $articles = Article::allowedSorts(['title', 'content'])->jsonPaginate();
 
-        return ArticleCollection::make($articles->paginate(
-            $perPage = request('page.size', 15),
-            $columns = ['*'],
-            $pageName = 'page[number]',
-            $page = request('page.number', 1)
-        )->appends(request()->only('sort','page.size')));
+        return ArticleCollection::make($articles);
     }
 
     public function store(SaveArticleRequest $request)
