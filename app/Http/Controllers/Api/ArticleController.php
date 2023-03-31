@@ -7,9 +7,7 @@ use App\Http\Resources\ArticleCollection;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use App\Http\Requests\SaveArticleRequest;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
@@ -18,35 +16,17 @@ class ArticleController extends Controller
         return ArticleResource::make($article);
     }
 
-    // public function index(Request $request): ArticleCollection
-    // {
-    //     $articles = Article::query();
-
-    //     if ($request->filled('sort'))
-    //     {
-    //         $sortFields = explode(',', $request->sort);
-    
-    //         $allowedSortFields = ['title', 'content'];
-    
-    //         foreach ($sortFields as $sortField) {
-    //             $sortDirection = Str::of($sortField)->startsWith('-') ? 'desc' : 'asc';
-        
-    //             $sortField = ltrim($sortField, '-');
-        
-    //             abort_unless(in_array($sortField, $allowedSortFields), 400);
-        
-    //             $articles = Article::orderBy($sortField, $sortDirection);
-    //         }
-    //     }
-
-    //     return ArticleCollection::make($articles->get());
-    // }
-
     public function index(): ArticleCollection
     {
         $articles = Article::allowedSorts(['title', 'content']);
-    
-        return ArticleCollection::make($articles->get());
+        //->jsonPaginate();
+
+        return ArticleCollection::make($articles->paginate(
+            $perPage = request('page.size', 15),
+            $columns = ['*'],
+            $pageName = 'page[number]',
+            $page = request('page.number', 1)
+        )->appends(request()->only('sort','page.size')));
     }
 
     public function store(SaveArticleRequest $request)

@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class JsonApiServiceProvider extends ServiceProvider
 {
@@ -22,7 +22,6 @@ class JsonApiServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Builder::macro('allowedSorts', function (array $allowedSorts) {
-            
             if (request()->filled('sort')) {
                 $sortFields = explode(',', request()->sort);
 
@@ -36,6 +35,17 @@ class JsonApiServiceProvider extends ServiceProvider
                     $this->orderBy($sortField, $sortDirection);
                 }
             }
+
+            return $this;
+        });
+
+        Builder::macro('jsonPaginate', function () {
+            $this->paginate(
+                $perPage = request('page.size', 15),
+                $columns = ['*'],
+                $pageName = 'page[number]',
+                $page = request('page.number', 1)
+            )->appends(request()->only('sort','page.size'));
 
             return $this;
         });
