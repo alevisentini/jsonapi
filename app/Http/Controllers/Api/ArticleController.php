@@ -18,27 +18,34 @@ class ArticleController extends Controller
         return ArticleResource::make($article);
     }
 
-    public function index(Request $request): ArticleCollection
+    // public function index(Request $request): ArticleCollection
+    // {
+    //     $articles = Article::query();
+
+    //     if ($request->filled('sort'))
+    //     {
+    //         $sortFields = explode(',', $request->sort);
+    
+    //         $allowedSortFields = ['title', 'content'];
+    
+    //         foreach ($sortFields as $sortField) {
+    //             $sortDirection = Str::of($sortField)->startsWith('-') ? 'desc' : 'asc';
+        
+    //             $sortField = ltrim($sortField, '-');
+        
+    //             abort_unless(in_array($sortField, $allowedSortFields), 400);
+        
+    //             $articles = Article::orderBy($sortField, $sortDirection);
+    //         }
+    //     }
+
+    //     return ArticleCollection::make($articles->get());
+    // }
+
+    public function index(): ArticleCollection
     {
-        $articles = Article::query();
-
-        if ($request->filled('sort'))
-        {
-            $sortFields = explode(',', $request->sort);
+        $articles = Article::allowedSorts(['title', 'content']);
     
-            $allowedSortFields = ['title', 'content'];
-    
-            foreach ($sortFields as $sortField) {
-                $sortDirection = Str::of($sortField)->startsWith('-') ? 'desc' : 'asc';
-        
-                $sortField = ltrim($sortField, '-');
-        
-                abort_unless(in_array($sortField, $allowedSortFields), 400);
-        
-                $articles = Article::orderBy($sortField, $sortDirection);
-            }
-        }
-
         return ArticleCollection::make($articles->get());
     }
 
