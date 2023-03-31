@@ -7,7 +7,9 @@ use App\Http\Resources\ArticleCollection;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
 use App\Http\Requests\SaveArticleRequest;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
@@ -16,9 +18,28 @@ class ArticleController extends Controller
         return ArticleResource::make($article);
     }
 
-    public function index()
+    public function index(Request $request): ArticleCollection
     {
-        return ArticleCollection::make(Article::all());
+        $articles = Article::query();
+
+        if ($request->filled('sort'))
+        {
+            $sortFields = explode(',', $request->sort);
+    
+            $allowedSortFields = ['title', 'content'];
+    
+            foreach ($sortFields as $sortField) {
+                $sortDirection = Str::of($sortField)->startsWith('-') ? 'desc' : 'asc';
+        
+                $sortField = ltrim($sortField, '-');
+        
+                abort_unless(in_array($sortField, $allowedSortFields), 400);
+        
+                $articles = Article::orderBy($sortField, $sortDirection);
+            }
+        }
+
+        return ArticleCollection::make($articles->get());
     }
 
     public function store(SaveArticleRequest $request)
