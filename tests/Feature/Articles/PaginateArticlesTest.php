@@ -131,4 +131,44 @@ class PaginateArticlesTest extends TestCase
             $nextLink
         );
     }
+
+    /**
+     * @test
+     * 
+     * can paginate filtered articles
+     */
+    public function can_paginate_filtered_articles()
+    {   
+        Article::factory()->count(3)->create();
+        Article::factory()->create(['title' => 'C Title']);
+        Article::factory()->create(['title' => 'A Title']);
+        Article::factory()->create(['title' => 'B Title']);
+
+        $response = $this->getJson(route('api.v1.articles.index', ['page' => ['size' => 1, 'number' => 1], 'filter' => ['title' => 'A']]));
+        
+        $firstLink = urldecode($response->json('links.first'));
+        $lastLink = urldecode($response->json('links.last'));
+        //$prevLink = urldecode($response->json('links.prev'));
+        $nextLink = urldecode($response->json('links.next'));
+
+        PHPUnit::assertStringContainsString(
+            'filter%5Btitle%5D=A',
+            $firstLink
+        );
+
+        // PHPUnit::assertStringContainsString(
+        //     'filter%5Btitle%5D=A',
+        //     $prevLink
+        // );
+
+        PHPUnit::assertStringContainsString(
+            'filter%5Btitle%5D=A',
+            $lastLink
+        );
+
+        PHPUnit::assertStringContainsString(
+            'filter%5Btitle%5D=A',
+            $nextLink
+        );
+    }
 }

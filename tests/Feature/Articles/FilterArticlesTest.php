@@ -158,5 +158,4 @@ class FilterArticlesTest extends TestCase
         $this->getJson($url)
             ->assertStatus(400);
     }
-
 }

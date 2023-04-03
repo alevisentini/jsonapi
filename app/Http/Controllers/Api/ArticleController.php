@@ -18,22 +18,10 @@ class ArticleController extends Controller
 
     public function index(): ArticleCollection
     {
-        $articles = Article::query();
-
-        $allowedFilters = ['title', 'content', 'year', 'month'];
-
-        foreach (request('filter', []) as $filter => $value) {
-            abort_unless(in_array($filter, $allowedFilters), 400);
-            if ($filter === 'year') {
-                $articles->whereYear('created_at', $value);
-            } elseif ($filter === 'month') {
-                $articles->whereMonth('created_at', $value);
-            } else {
-                $articles->where($filter, 'LIKE', '%' . $value . '%');
-            }
-        }
-
-        $articles->allowedSorts(['title', 'content'])->jsonPaginate();
+        $articles = Article::query()
+            ->allowedFilters(['title', 'content', 'year', 'month'])
+            ->allowedSorts(['title', 'content'])
+            ->jsonPaginate();
 
         return ArticleCollection::make($articles);
     }
