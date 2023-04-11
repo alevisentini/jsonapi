@@ -11,6 +11,8 @@ class Article extends Model
 {
     use HasFactory;
 
+    public $resourceType = 'articles';
+
     /**
      * The attributes that aren't mass assignable.
      *
