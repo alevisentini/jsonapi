@@ -21,26 +21,15 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $response = $this->patchJson(route('api.v1.articles.update', $article), [
-                    'title' => 'Update title',
-                    'slug' => $article->slug,
-                    'content' => 'Update content',
+            'title' => 'Update title',
+            'slug' => $article->slug,
+            'content' => 'Update content',
         ])->assertOk();
 
-        $response->assertHeader('Location', route('api.v1.articles.show', $article));
-
-        $response->assertExactJson([
-            'data' => [
-                'type' => 'articles',
-                'id' => (string) $article->getRouteKey(),
-                'attributes' => [
-                    'title' => 'Update title',
-                    'slug' => $article->slug,
-                    'content' => 'Update content',
-                ],
-                'links' => [
-                    'self' => url(route('api.v1.articles.show', $article)),
-                ],
-            ],
+        $response->assertJsonApiResource($article, [
+            'title' => 'Update title',
+            'slug' => $article->slug,
+            'content' => 'Update content',
         ]);
     }
 
@@ -54,8 +43,8 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article), [
-                    'slug' => 'slug-content',
-                    'content' => 'Update content',
+            'slug' => 'slug-content',
+            'content' => 'Update content',
         ])->assertJsonApiValidationErrors('title');
     }
 
@@ -69,8 +58,8 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article), [
-                    'title' => 'Update title',
-                    'content' => 'Update content',
+            'title' => 'Update title',
+            'content' => 'Update content',
         ])->assertJsonApiValidationErrors('slug');
     }
 
@@ -85,9 +74,9 @@ class UpdateArticleTest extends TestCase
         $article2 = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article1), [
-                    'title' => 'Some title',
-                    'slug' => $article2->slug,
-                    'content' => 'Some content',
+            'title' => 'Some title',
+            'slug' => $article2->slug,
+            'content' => 'Some content',
         ])->assertJsonApiValidationErrors('slug');
     }
 
@@ -101,9 +90,9 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article), [
-                    'title' => 'Some title',
-                    'slug' => '?*%',
-                    'content' => 'Some content',
+            'title' => 'Some title',
+            'slug' => '?*%',
+            'content' => 'Some content',
         ])->assertJsonApiValidationErrors('slug');
     }
 
@@ -117,9 +106,9 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article), [
-                    'title' => 'Some title',
-                    'slug' => 'some_title',
-                    'content' => 'Some content',
+            'title' => 'Some title',
+            'slug' => 'some_title',
+            'content' => 'Some content',
         ])->assertJsonApiValidationErrors('slug');
     }
 
@@ -133,9 +122,9 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article), [
-                    'title' => 'Some title',
-                    'slug' => '-some-title',
-                    'content' => 'Some content',
+            'title' => 'Some title',
+            'slug' => '-some-title',
+            'content' => 'Some content',
         ])->assertJsonApiValidationErrors('slug');
     }
 
@@ -149,9 +138,9 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article), [
-                    'title' => 'Some title',
-                    'slug' => 'some-title-',
-                    'content' => 'Some content',
+            'title' => 'Some title',
+            'slug' => 'some-title-',
+            'content' => 'Some content',
         ])->assertJsonApiValidationErrors('slug');
     }
 
@@ -165,8 +154,8 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article), [
-                    'title' => 'Update title',
-                    'slug' => 'slug-content',
+            'title' => 'Update title',
+            'slug' => 'slug-content',
         ])->assertJsonApiValidationErrors('content');
     }
 
@@ -180,10 +169,9 @@ class UpdateArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->patchJson(route('api.v1.articles.update', $article), [
-                    'title' => 'ab',
-                    'slug' => 'slug-content',
-                    'content' => 'Update content',
+            'title' => 'ab',
+            'slug' => 'slug-content',
+            'content' => 'Update content',
         ])->assertJsonApiValidationErrors('title');
     }
 }
-
