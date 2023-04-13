@@ -15,9 +15,9 @@ class JsonApiTestResponse
         return function ($attribute) {
             /** @var TestResponse $this */
 
-            $pointer = Str::of($attribute)->startsWith('data') 
-                        ? '/'.str_replace('.', '/', $attribute)
-                        : "/data/attributes/$attribute";
+            $pointer = Str::of($attribute)->startsWith('data')
+                ? '/' . str_replace('.', '/', $attribute)
+                : "/data/attributes/$attribute";
 
             try {
                 $this->assertJsonFragment([
@@ -47,12 +47,10 @@ class JsonApiTestResponse
                 );
             }
 
-            $this->assertHeader(
+            return $this->assertHeader(
                 'Content-Type',
                 'application/vnd.api+json'
-            );
-
-            $this->assertStatus(422);
+            )->assertStatus(422);
         };
     }
 
@@ -60,8 +58,8 @@ class JsonApiTestResponse
     {
         return function ($model, $attributes) {
             /** @var TestResponse $this */
-            
-            $this->assertJson([
+
+            return $this->assertJson([
                 'data' => [
                     'type' => $model->getResourceType(),
                     'id' => (string) $model->getRouteKey(),
@@ -86,7 +84,7 @@ class JsonApiTestResponse
                     ]
                 ]
             ]);
-            
+
             foreach ($models as $model) {
                 $this->assertJsonFragment([
                     'type' => $model->getResourceType(),
@@ -96,6 +94,8 @@ class JsonApiTestResponse
                     ],
                 ]);
             }
+
+            return $this;
         };
     }
 }

@@ -10,6 +10,8 @@ class Category extends Model
 {
     use HasFactory;
 
+    public $resourceType = 'categories';
+
     /**
      * The attributes that aren't mass assignable.
      *
@@ -29,5 +31,10 @@ class Category extends Model
     public function articles(): HasMany
     {
         return $this->hasMany(Article::class);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 }
