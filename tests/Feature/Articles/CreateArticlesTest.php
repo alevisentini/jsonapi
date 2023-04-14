@@ -5,7 +5,7 @@ namespace Tests\Feature\Articles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Article;
-use Illuminate\Testing\TestResponse;
+use App\Models\Category;
 
 class CreateArticlesTest extends TestCase
 {
@@ -18,10 +18,15 @@ class CreateArticlesTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
+        $category = Category::factory()->create();
+
         $response = $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'slug' => 'some-title',
                     'content' => 'Some content',
+                    '_relationships' => [
+                        'category' => $category,
+                    ],
         ])->assertCreated();
 
         $article = Article::first();

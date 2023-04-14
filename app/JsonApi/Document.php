@@ -17,13 +17,17 @@ class Document extends Collection
 
     public function id(string $id): self
     {
-        $this->items['data']['id'] = (string) $id;
+        if ($id) {
+            $this->items['data']['id'] = (string) $id;
+        }
 
         return $this;
     }
 
     public function attributes(array $attributes): self
     {
+        unset($attributes['_relationships']);
+        
         $this->items['data']['attributes'] = $attributes;
 
         return $this;
