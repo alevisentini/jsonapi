@@ -3,6 +3,7 @@
 namespace App\JsonApi\Traits;
 
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\JsonApi\Document;
 
 trait JsonApiResource
 {
@@ -15,14 +16,14 @@ trait JsonApiResource
      */
     public function toArray($request): array
     {
-        return [
-            'type' => $this->getResourceType(),
-            'id' => (string) $this->resource->getRouteKey(),
-            'attributes' => $this->filterAttributes($this->toJsonApi()),
-            'links' => [
+        return Document::type($this->getResourceType())
+            ->id($this->resource->getRouteKey())
+            ->attributes($this->filterAttributes($this->toJsonApi()))
+            ->links([
                 'self' => url(route('api.v1.' . $this->getResourceType() . '.show', $this->resource)),
-            ],
-        ];
+            ])
+            ->get('data');
+        
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\JsonApi\Document;
 use Illuminate\Testing\TestResponse;
 use Illuminate\Support\Str;
 trait MakesJsonApiRequests
@@ -14,13 +15,10 @@ trait MakesJsonApiRequests
         $type = (string) Str::of($path)->after('api/v1/')->before('/');
         $id = (string) Str::of($uri)->after($type)->replace('/', '');
 
-        return [
-            'data' => array_filter([
-                'type' => $type,
-                'id' => $id,
-                'attributes' => $data,
-            ])
-        ];
+        return Document::type($type)
+            ->id($id)
+            ->attributes($data)
+            ->toArray();
     }
 
     public function withoutJsonApiDocumentFormatting()
