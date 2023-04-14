@@ -18,4 +18,9 @@ class ArticleResource extends JsonResource
         ];
     }
 
+    public function getRelationshipsLinks(): array
+    {
+        return ['category'];
+    }
+
 }
