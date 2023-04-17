@@ -5,6 +5,7 @@ namespace App\JsonApi\Traits;
 use App\Http\Resources\CategoryResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\JsonApi\Document;
+use Illuminate\Http\Resources\MissingValue;
 
 trait JsonApiResource
 {
@@ -18,7 +19,12 @@ trait JsonApiResource
     public function toArray($request): array
     {
         if ($request->filled('include')) {
-            $this->with['included'] = $this->getIncludes();
+            foreach ($this->getIncludes() as $include) {
+                if ($include->resource instanceof MissingValue) {
+                    continue;
+                }
+                $this->with['included'] = $this->getIncludes();
+            }
         }
                 
         return Document::type($this->getResourceType())
@@ -77,6 +83,9 @@ trait JsonApiResource
         if (request()->filled('include')) {
             foreach ($resources as $resource) {
                 foreach ($resource->getIncludes() as $include) {
+                    if ($include->resource instanceof MissingValue) {
+                        continue;
+                    }
                     $collection->with['included'][] = $include;
                 }
             }
