@@ -65,4 +65,22 @@ class IncludeCategoryTest extends TestCase
             ]
         ]);
     }
+
+    /**
+     * @test
+     */
+    public function cannot_include_unknown_relationships()
+    {
+        $article = Article::factory()->create();
+
+        $this->getJson(route('api.v1.articles.show', [
+            'article' => $article,
+            'include' => 'unknown, unknown2'
+        ]))->assertStatus(400);
+
+        $this->getJson(route('api.v1.articles.index', [
+            'include' => 'unknown, unknown2'
+        ]))->assertStatus(400);
+    }
+    
 }
