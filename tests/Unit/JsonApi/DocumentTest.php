@@ -17,13 +17,13 @@ class DocumentTest extends TestCase
             $mock->shouldReceive('getResourceType')->andReturn('categories');
             $mock->shouldReceive('getRouteKey')->andReturn('category-id');
         });
-        
+
         $document = Document::type('articles')
             ->id('article-id')
             ->attributes([
                 'title' => 'Article Title',
             ])
-            ->relationships([
+            ->relationshipsData([
                 'category' => $category,
             ])
             ->toArray();

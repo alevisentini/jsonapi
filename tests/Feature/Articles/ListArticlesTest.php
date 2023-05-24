@@ -23,7 +23,7 @@ class ListArticlesTest extends TestCase
             'title' => $article->title,
             'slug' => $article->slug,
             'content' => $article->content
-        ])->assertJsonApiRelationshipLinks($article, ['category']);
+        ])->assertJsonApiRelationshipLinks($article, ['category', 'author']);
     }
 
     /**
@@ -40,5 +40,18 @@ class ListArticlesTest extends TestCase
         $response->assertJsonApiResourceCollection($articles, [
             'title', 'slug', 'content'
         ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_returns_a_json_api_error_object_when_an_article_is_not_found()
+    {
+        $this->getJson(route('api.v1.articles.show', 'not-existing'))
+            ->assertJsonApiError(
+                title: 'Not Found',
+                detail: 'No record found with the ID "not-existing" in the "articles" resource',
+                status: '404'
+            );
     }
 }

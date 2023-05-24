@@ -44,10 +44,8 @@ class Document extends Collection
     {
         foreach ($relationships as $key => $relationship) {
             $this->items['data']['relationships'][$key]['data'] = [
-                'data' => [
-                    'type' => $relationship->getResourceType(),
-                    'id' => $relationship->getRouteKey(),
-                ],
+                'type' => $relationship->getResourceType(),
+                'id' => $relationship->getRouteKey(),
             ];
         }
 

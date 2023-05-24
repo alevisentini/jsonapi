@@ -96,4 +96,11 @@ trait JsonApiResource
         return $collection;
     }
 
+    public static function identifier($resource): array
+    {
+        return Document::type($resource->getResourceType())
+            ->id($resource->getRouteKey())
+            ->toArray();
+    }
+
 }

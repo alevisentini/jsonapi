@@ -28,7 +28,7 @@ class Article extends Model
     protected $casts = [
         'id' => 'integer',
         'category_id' => 'integer',
-        'user_id' => 'integer',
+        'user_id' => 'string',
     ];
 
     public function category(): BelongsTo
@@ -36,9 +36,9 @@ class Article extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function user(): BelongsTo
+    public function author(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function getRouteKeyName(): string
@@ -54,6 +54,25 @@ class Article extends Model
     public function scopeMonth(Builder $query, int $month)
     {
         $query->whereMonth('created_at', $month);
+    }
+
+    public function scopeCategories(Builder $query, $categories)
+    {
+        $categorySlugs = explode(',', $categories);
+        
+        $query->whereHas('category', function ($q) use ($categorySlugs) {
+            $q->whereIn('slug', $categorySlugs);
+        });
+    }
+
+    public function scopeTitle(Builder $query, string $title)
+    {
+        $query->where('title', 'like', "%{$title}%");
+    }
+
+    public function scopeContent(Builder $query, string $content)
+    {
+        $query->where('content', 'like', "%{$content}%");
     }
 
 }

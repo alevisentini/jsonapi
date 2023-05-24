@@ -80,7 +80,10 @@ class IncludeCategoryTest extends TestCase
 
         $this->getJson(route('api.v1.articles.index', [
             'include' => 'unknown, unknown2'
-        ]))->assertStatus(400);
+        ]))->assertJsonApiError(
+            title: 'Bad Request',
+            detail: "The included relationship 'unknown' is not allowed in the 'articles' resource.",
+            status: '400'
+        );
     }
-    
 }

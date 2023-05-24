@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\User;
 
 class CreateArticlesTest extends TestCase
 {
@@ -16,8 +17,7 @@ class CreateArticlesTest extends TestCase
      */
     public function can_create_articles()
     {
-        $this->withoutExceptionHandling();
-
+        $user = User::factory()->create();
         $category = Category::factory()->create();
 
         $response = $this->postJson(route('api.v1.articles.store'), [
@@ -26,26 +26,22 @@ class CreateArticlesTest extends TestCase
                     'content' => 'Some content',
                     '_relationships' => [
                         'category' => $category,
+                        'author' => $user,
                     ],
         ])->assertCreated();
 
         $article = Article::first();
 
-        $response->assertHeader('Location', route('api.v1.articles.show', $article));
-
-        $response->assertExactJson([
-            'data' => [
-                'type' => 'articles',
-                'id' => (string) $article->getRouteKey(),
-                'attributes' => [
+        $response->assertJsonApiResource($article, [
                     'title' => 'Some title',
                     'slug' => 'some-title',
                     'content' => 'Some content',
-                ],
-                'links' => [
-                    'self' => url(route('api.v1.articles.show', $article)),
-                ],
-            ],
+        ]);
+
+        $this->assertDatabaseHas('articles', [
+                    'title' => 'Some title',
+                    'user_id' => $user->id,
+                    'category_id' => $category->id,
         ]);
     }
 
