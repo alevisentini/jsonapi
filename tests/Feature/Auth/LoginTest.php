@@ -2,14 +2,13 @@
 
 namespace Tests\Feature\Auth;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
-use Faker\Provider\ar_EG\Person;
+use App\Models\Permission;
 use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class AccessTokenTest extends TestCase
+class LoginTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -22,13 +21,18 @@ class AccessTokenTest extends TestCase
         ], $overrides);
     }
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutJsonApiHelpers();
+    }
+
     /**
      * @test
      */
     public function can_issue_access_tokens()
     {
-        $this->withoutJsonApiDocumentFormatting();
-
         $user = User::factory()->create();
 
         $response = $this->postJson(route('api.v1.login'), $this->validCredentials([
@@ -46,8 +50,6 @@ class AccessTokenTest extends TestCase
      */
     public function password_must_be_valid()
     {
-        $this->withoutJsonApiDocumentFormatting();
-
         $user = User::factory()->create();
 
         $response = $this->postJson(route('api.v1.login'), $this->validCredentials([
@@ -63,8 +65,6 @@ class AccessTokenTest extends TestCase
      */
     public function password_is_required()
     {
-        $this->withoutJsonApiDocumentFormatting();
-
         $user = User::factory()->create();
 
         $response = $this->postJson(route('api.v1.login'), $this->validCredentials([
@@ -80,8 +80,6 @@ class AccessTokenTest extends TestCase
      */
     public function user_must_be_registered()
     {
-        $this->withoutJsonApiDocumentFormatting();
-
         $response = $this->postJson(route('api.v1.login'), $this->validCredentials());
 
         $response->assertJsonValidationErrorFor('email');
@@ -92,8 +90,6 @@ class AccessTokenTest extends TestCase
      */
     public function email_is_required()
     {
-        $this->withoutJsonApiDocumentFormatting();
-
         $response = $this->postJson(route('api.v1.login'), $this->validCredentials([
             'email' => ''
         ]));
@@ -106,8 +102,6 @@ class AccessTokenTest extends TestCase
      */
     public function email_must_be_valid()
     {
-        $this->withoutJsonApiDocumentFormatting();
-
         $response = $this->postJson(route('api.v1.login'), $this->validCredentials([
             'email' => 'invalid-email'
         ]));
@@ -120,12 +114,51 @@ class AccessTokenTest extends TestCase
      */
     public function device_name_is_required()
     {
-        $this->withoutJsonApiDocumentFormatting();
-
         $response = $this->postJson(route('api.v1.login'), $this->validCredentials([
             'device_name' => ''
         ]));
 
         $response->assertJsonValidationErrors(['device_name' => 'required']);
+    }
+
+    /**
+     * @test
+     */
+    public function user_permissions_are_assigned_as_abilities_to_the_token()
+    {
+        $user = User::factory()->create();
+
+        $permission1 = Permission::factory()->create();
+        $permission2 = Permission::factory()->create();
+        $permission3 = Permission::factory()->create();
+
+        $user->givePermissionTo($permission1);
+        $user->givePermissionTo($permission2);
+
+        $response = $this->postJson(route('api.v1.login'), $this->validCredentials([
+            'email' => $user->email
+        ]));
+
+        $token = $response->json('plain-text-token');
+
+        $this->assertTrue(PersonalAccessToken::findToken($token)->can($permission1->name));
+        $this->assertTrue(PersonalAccessToken::findToken($token)->can($permission2->name));
+        $this->assertFalse(PersonalAccessToken::findToken($token)->can($permission3->name));
+    }
+
+    /**
+     * @test
+     */
+    public function only_one_access_token_can_be_issued_at_a_time()
+    {
+        $user = User::factory()->create();
+
+        $accessToken = $user->createToken($user->name)->plainTextToken;
+
+        $this->withHeaders(['Authorization' => 'Bearer ' . $accessToken])
+            ->postJson(route('api.v1.login'))
+            ->assertNoContent();
+
+        $this->assertCount(1, $user->tokens);
     }
 }

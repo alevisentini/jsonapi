@@ -57,8 +57,6 @@ class AuthorRelatioshipTest extends TestCase
         $article = Article::factory()->create();
         $author = User::factory()->create();
 
-        $this->withoutJsonApiDocumentFormatting();
-
         $response = $this->patchJson(route('api.v1.articles.relationships.author', $article), [
             'data' => [
                 'type' => 'authors',
@@ -85,8 +83,6 @@ class AuthorRelatioshipTest extends TestCase
     public function author_must_exist_in_database()
     {
         $article = Article::factory()->create();
-
-        $this->withoutJsonApiDocumentFormatting();
 
         $this->patchJson(route('api.v1.articles.relationships.author', $article), [
             'data' => [

@@ -56,8 +56,6 @@ class CategoryRelatioshipTest extends TestCase
         $article = Article::factory()->create();
         $category = Category::factory()->create();
 
-        $this->withoutJsonApiDocumentFormatting();
-
         $response = $this->patchJson(route('api.v1.articles.relationships.category', $article), [
             'data' => [
                 'type' => 'categories',
@@ -84,8 +82,6 @@ class CategoryRelatioshipTest extends TestCase
     public function category_must_exist_in_database()
     {
         $article = Article::factory()->create();
-
-        $this->withoutJsonApiDocumentFormatting();
 
         $this->patchJson(route('api.v1.articles.relationships.category', $article), [
             'data' => [

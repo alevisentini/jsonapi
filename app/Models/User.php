@@ -45,4 +45,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
     
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class);
+    }
+
+    public function givePermissionTo(Permission $permission)
+    {
+        return $this->permissions()->syncWithoutDetaching($permission);
+    }
 }

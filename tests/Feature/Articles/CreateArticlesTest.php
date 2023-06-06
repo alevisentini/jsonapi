@@ -7,6 +7,7 @@ use Tests\TestCase;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 
 class CreateArticlesTest extends TestCase
 {
@@ -19,6 +20,8 @@ class CreateArticlesTest extends TestCase
     {
         $user = User::factory()->create();
         $category = Category::factory()->create();
+
+        Sanctum::actingAs($user, ['articles.create']);
 
         $response = $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
@@ -47,11 +50,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * title is required
      */
     public function title_is_required()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'slug' => 'some-title',
                     'content' => 'Some content',
@@ -60,11 +63,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * slug is required
      */
     public function slug_is_required()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'content' => 'Some content',
@@ -73,11 +76,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * slug is unique
      */
     public function slug_must_be_unique()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $article = Article::factory()->create();
 
         $this->postJson(route('api.v1.articles.store'), [
@@ -89,11 +92,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * slug must only contain letters, numbers and underscores
      */
     public function slug_must_only_contain_letters_numbers_and_underscores()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'slug' => '?*%',
@@ -103,11 +106,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * slug must not contain underscores
      */
     public function slug_must_not_contain_underscores()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'slug' => 'some_title',
@@ -117,11 +120,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * slug must not start with dashes
      */
     public function slug_must_not_start_with_dashes()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'slug' => '-some-title',
@@ -131,11 +134,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * slug must not end with dashes
      */
     public function slug_must_not_end_with_dashes()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'slug' => 'some-title-',
@@ -146,11 +149,11 @@ class CreateArticlesTest extends TestCase
     
     /**
      * @test
-     * 
-     * content is required
      */
     public function content_is_required()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'slug' => 'some-title',
@@ -159,11 +162,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * title must be at least 3 characters
      */
     public function title_must_be_at_least_3_characters()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'ab',
                     'slug' => 'some-title',
@@ -173,11 +176,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * category relationship is required
      */
     public function category_relationship_is_required()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'slug' => 'some-title',
@@ -187,11 +190,11 @@ class CreateArticlesTest extends TestCase
 
     /**
      * @test
-     * 
-     * category relationship must exist
      */
     public function category_relationship_must_exist_on_database()
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson(route('api.v1.articles.store'), [
                     'title' => 'Some title',
                     'slug' => 'some-title',
@@ -200,6 +203,21 @@ class CreateArticlesTest extends TestCase
                         'category' => Category::factory()->make(),
                     ],
         ])->assertJsonApiValidationErrors('data.relationships.category.data.id');
+    }
+
+    /**
+     * @test
+     */
+    public function guests_cannot_create_articles()
+    {
+        $this->postJson(route('api.v1.articles.store'))->assertUnauthorized()
+                ->assertJsonApiError(
+                    title: 'Unauthenticated',
+                    detail: 'This action requires authentication.',
+                    status: '401',
+        );
+
+        $this->assertDatabaseCount('articles', 0);  
     }
 
 }
