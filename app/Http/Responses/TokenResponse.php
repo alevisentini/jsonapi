@@ -2,8 +2,8 @@
 
 namespace App\Http\Responses;
 
-use Illuminate\Contracts\Support\Responsable;
 use App\Models\User;
+use Illuminate\Contracts\Support\Responsable;
 
 class TokenResponse implements Responsable
 {
@@ -13,7 +13,7 @@ class TokenResponse implements Responsable
     {
         $this->user = $user;
     }
-    
+
     public function toResponse($request)
     {
         $plainTextToken = $this->user->createToken(
@@ -22,7 +22,7 @@ class TokenResponse implements Responsable
         )->plainTextToken;
 
         return response()->json([
-            'plain-text-token' => $plainTextToken
+            'plain-text-token' => $plainTextToken,
         ]);
     }
 }

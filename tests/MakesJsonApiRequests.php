@@ -36,7 +36,7 @@ trait MakesJsonApiRequests
     {
         $path = parse_url($uri)['path'];
         $type = (string) Str::of($path)->after('api/v1/')->before('/');
-        $id = (string) Str::of($uri)->after($type)->replace('/', '');
+        $id = (string) Str::of($path)->after($type)->replace('/', '');
 
         return Document::type($type)
             ->id($id)
@@ -56,7 +56,7 @@ trait MakesJsonApiRequests
             }
         }
 
-        if ($this->formatJsonApiDocument) {
+        if ($this->formatJsonApiDocument && in_array($method, ['POST', 'PATCH'])) {
             if (! isset($data['data'])) {
                 $formattedData = $this->getFormattedData($uri, $data);
             }

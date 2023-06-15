@@ -6,9 +6,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Testing\TestResponse;
 use Illuminate\Http\Request;
-use App\JsonApi\JsonApiQueryBuilder;
-use App\JsonApi\JsonApiTestResponse;
-use App\JsonApi\JsonApiRequest;
+use App\JsonApi\Mixins\JsonApiQueryBuilder;
+use App\JsonApi\Mixins\JsonApiTestResponse;
+use App\JsonApi\Mixins\JsonApiRequest;
 
 class JsonApiServiceProvider extends ServiceProvider
 {
@@ -17,7 +17,12 @@ class JsonApiServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // cuando se necesite una instancia de la clase \App\Exceptions\Handler 
+        // se va a crear una instancia de la clase \App\JsonApi\Exceptions\Handler
+        $this->app->singleton(
+            \App\Exceptions\Handler::class,
+            \App\JsonApi\Exceptions\Handler::class
+        );
     }
 
     /**

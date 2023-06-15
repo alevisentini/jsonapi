@@ -6,6 +6,8 @@ use App\Http\Resources\CategoryResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\JsonApi\Document;
 use Illuminate\Http\Resources\MissingValue;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 trait JsonApiResource
 {
@@ -16,10 +18,18 @@ trait JsonApiResource
      *
      * @return array<string, mixed>
      */
-    public function toArray($request): array
+    public function toArray($request)
     {
         if ($request->filled('include')) {
             foreach ($this->getIncludes() as $include) {
+                
+                if ($include->resource instanceof Collection) {
+                    foreach ($include->resource as $resource) {
+                        $this->with['included'][] = $resource;
+                    }
+                    continue;
+                }
+                
                 if ($include->resource instanceof MissingValue) {
                     continue;
                 }
@@ -81,8 +91,15 @@ trait JsonApiResource
         $collection = parent::collection($resources);
 
         if (request()->filled('include')) {
-            foreach ($resources as $resource) {
+            foreach ($collection->resource as $resource) {
                 foreach ($resource->getIncludes() as $include) {
+                    if ($include->resource instanceof Collection) {
+                        foreach ($include->resource as $resource) {
+                            $collection->with['included'][] = $resource;
+                        }
+                        continue;
+                    }
+
                     if ($include->resource instanceof MissingValue) {
                         continue;
                     }
@@ -91,15 +108,24 @@ trait JsonApiResource
             }
         }
 
-        $collection->with['links'] = ['self' => $resources->path()];
+        $collection->with['links'] = ['self' => request()->path()];
 
         return $collection;
     }
 
-    public static function identifier($resource): array
+    public static function identifier(Model $resource): array
     {
         return Document::type($resource->getResourceType())
             ->id($resource->getRouteKey())
+            ->toArray();
+    }
+
+    public static function identifiers(Collection $resource): array
+    {
+        return $resource->isEmpty() 
+            ? Document::empty()
+            : Document::type($resource->first()->getResourceType())
+            ->ids($resource)
             ->toArray();
     }
 

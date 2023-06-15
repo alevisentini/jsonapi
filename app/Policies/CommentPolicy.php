@@ -35,15 +35,15 @@ class CommentPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Comment $comment): bool
+    public function update(User $user, Comment $comment): Response|bool
     {
-        return $user->is($comment->author) && $user->tokenCan('comment.update');
+        return $user->is($comment->author) && $user->tokenCan('comment:update');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Comment $comment): bool
+    public function delete(User $user, Comment $comment): Response|bool
     {
         return $user->is($comment->author) && $user->tokenCan('comment.delete');
     }

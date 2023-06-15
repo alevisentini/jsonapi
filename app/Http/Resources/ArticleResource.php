@@ -27,7 +27,8 @@ class ArticleResource extends JsonResource
     {
         return [
             CategoryResource::make($this->whenLoaded('category')),
-            AuthorResource::make($this->whenLoaded('author'))
+            AuthorResource::make($this->whenLoaded('author')),
+            CommentResource::collection($this->whenLoaded('comments')),
         ];
     }
 

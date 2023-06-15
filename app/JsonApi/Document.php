@@ -2,7 +2,7 @@
 
 namespace App\JsonApi;
 
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class Document extends Collection
 {
@@ -15,6 +15,13 @@ class Document extends Collection
         ]);
     }
 
+    public static function empty(): array
+    {
+        return [
+            'data' => [],
+        ];
+    }
+
     public function id(string $id): self
     {
         if ($id) {
@@ -23,6 +30,29 @@ class Document extends Collection
 
         return $this;
     }
+
+    public function ids(Collection $resources): Document
+    {
+        $this->items['data'] = [];
+
+        foreach ($resources as $resource) {
+            $this->items['data'][] = [
+                'id' => (string) $resource->getRouteKey(),
+                'type' => $resource->getResourceType(),
+            ];
+        }
+        
+        // el siguiente código es equivalente al anterior
+
+        // $this->items['data'] = $resources->map(fn ($resource) => [
+        //         'id' => (string) $resource->getRouteKey(),
+        //         'type' => $resource->getResourceType(),
+        //     ]
+        // );
+
+        return $this;
+    }
+    
 
     public function attributes(array $attributes): self
     {

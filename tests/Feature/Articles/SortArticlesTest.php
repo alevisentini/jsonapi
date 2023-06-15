@@ -82,7 +82,7 @@ class SortArticlesTest extends TestCase
         $this->getJson(route('api.v1.articles.index', ['sort' => 'unknown']))
                 ->assertJsonApiError(
                     title : 'Bad Request',
-                    detail:  "The sort field 'unknown' is not allowed in the 'articles' resource.",
+                    detail:  "The sort field 'unknown' is not allowed in the 'articles' resource",
                     status:  '400'
         );
     }

@@ -25,7 +25,7 @@ class ListCommentsTest extends TestCase
             'body' => 'This is the body of the comment'
         ]);
         
-        // $response->assertJsonApiRelationshipLinks($comment, ['category', 'author']);
+        $response->assertJsonApiRelationshipLinks($comment, ['article', 'author']);
     }
 
     /**

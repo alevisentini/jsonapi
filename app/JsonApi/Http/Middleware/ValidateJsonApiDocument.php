@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\JsonApi\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
@@ -20,10 +20,14 @@ class ValidateJsonApiDocument
         if ($request->method() === 'POST' || $request->method() === 'PATCH') {
             $request->validate([
                 'data' => ['required', 'array'],
-                'data.type' => ['required', 'string'],
+                'data.type' => [
+                    'required_without:data.0.type', //obligatorio siempre y cuando no exista un type dentro del primer elemento de data
+                    'string'
+                ],
                 'data.attributes' => [
                     Rule::requiredIf(
                         ! Str::of($request->url())->contains('relationships')
+                        && request()->isNotFilled('data.0.type')
                     ), 
                     'array'
                 ],
@@ -32,7 +36,10 @@ class ValidateJsonApiDocument
 
         if ($request->method() === 'PATCH') {
             $request->validate([
-                'data.id' => ['required', 'string']
+                'data.id' => [
+                    'required_without:data.0.id', 
+                    'string',
+                ]
             ]);
         }
 

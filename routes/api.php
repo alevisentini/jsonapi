@@ -6,59 +6,64 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\AuthorController;
 use App\Http\Controllers\Api\ArticleCategoryController;
 use App\Http\Controllers\Api\ArticleAuthorController;
+use App\Http\Controllers\Api\ArticleCommentController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\LogoutController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\CommentArticleController;
-use App\Http\Middleware\ValidateJsonApiDocument;
-use App\Http\Middleware\ValidateJsonApiHeaders;
+use App\Http\Controllers\Api\CommentAuthorController;
+use App\JsonApi\Http\Middleware\ValidateJsonApiDocument;
+use App\JsonApi\Http\Middleware\ValidateJsonApiHeaders;
 
-Route::apiResource('authors', AuthorController::class)
-        ->only(['index', 'show']);
 
 Route::apiResource('articles', ArticleController::class);
 
 Route::apiResource('comments', CommentController::class);
 
-Route::get('comments/{comment}/relationships/article', [
-        CommentArticleController::class, 'index'
-])->name('comments.relationships.article');
-
-Route::get('comments/{comment}/article', [
-        CommentArticleController::class, 'show'
-])->name('comments.article');
-
-Route::patch('comments/{comment}/relationships/article', [
-        CommentArticleController::class, 'update'
-])->name('comments.relationships.article');
-
+Route::apiResource('authors', AuthorController::class)
+        ->only(['index', 'show']);
 Route::apiResource('categories', CategoryController::class)
         ->only(['index', 'show']);
 
-Route::get('articles/{article}/category', [
-        ArticleCategoryController::class, 'show'
-])->name('articles.category');
+Route::prefix('comments/{comment}')->group(function () {
+        Route::controller(CommentArticleController::class)
+                ->group(function () {
+                        Route::get('relationships/article', 'index')->name('comments.relationships.article');
+                        Route::get('article', 'show')->name('comments.article');
+                        Route::patch('relationships/article', 'update');
+                });
+        
+        Route::controller(CommentAuthorController::class)
+                ->group(function () {
+                        Route::get('relationships/author', 'index')->name('comments.relationships.author');
+                        Route::get('author', 'show')->name('comments.author');
+                        Route::patch('relationships/author', 'update');
+                });
+});
 
-Route::get('articles/{article}/relationships/category', [
-        ArticleCategoryController::class, 'index'
-])->name('articles.relationships.category');
+Route::prefix('articles/{article}')->group(function () {
+        Route::controller(ArticleCategoryController::class)
+                ->group(function () {
+                        Route::get('relationships/category', 'index')->name('articles.relationships.category');
+                        Route::get('category', 'show')->name('articles.category');
+                        Route::patch('relationships/category', 'update');
+                });
 
-Route::patch('articles/{article}/relationships/category', [
-        ArticleCategoryController::class, 'update'
-])->name('articles.relationships.category');
+        Route::controller(ArticleAuthorController::class)
+                ->group(function () {
+                        Route::get('relationships/author', 'index')->name('articles.relationships.author');
+                        Route::get('author', 'show')->name('articles.author');
+                        Route::patch('relationships/author', 'update');
+                });
 
-Route::get('articles/{article}/author', [
-        ArticleAuthorController::class, 'show'
-])->name('articles.author');
-
-Route::get('articles/{article}/relationships/author', [
-        ArticleAuthorController::class, 'index'
-])->name('articles.relationships.author');
-
-Route::patch('articles/{article}/relationships/author', [
-        ArticleAuthorController::class, 'update'
-])->name('articles.relationships.author');
+        Route::controller(ArticleCommentController::class)
+                ->group(function () {
+                        Route::get('relationships/comments', 'index')->name('articles.relationships.comments');
+                        Route::get('comments', 'show')->name('articles.comments');
+                        Route::patch('relationships/comments', 'update');
+                });
+});
 
 Route::withoutMiddleware([
         ValidateJsonApiDocument::class,
